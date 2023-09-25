@@ -1,30 +1,35 @@
 import pygame
 import math
 import random
-
+from time import time
 RED = (255, 0, 0)
-WHITE = (100, 255, 255)
-
+WHITE = (255, 255, 255)
+count = 0
+win_pic = pygame.image.load('trophy.png')
+win_pic = pygame.transform.scale(win_pic, (1000, 500))
+lost_pic = pygame.image.load('lost.jpg')
+lost_pic = pygame.transform.scale(lost_pic, (1000, 500))
+class all(pygame.sprite.Sprite):
+    def __init__(self, picture, w, h, x, y):
+        super().__init__()
+        self.image=pygame.transform.scale(pygame.image.load(picture), (w, h))
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
+    def reset(self):
+        screen.blit(self.image, (self.rect.x, self.rect.y))
 #описываем класс курсора
 class Mouse(pygame.sprite.Sprite):
     def __init__(self, position, w, h):
-        #self.image = pygame.image.load('cursor.png')
+        self.image = pygame.image.load('cursor.png')
         self.image=pygame.transform.scale(pygame.image.load('cursor.png'), (w, h))
         self.rect = self.image.get_rect()
-        #self.rect.x = x
-        #self.rect.y = y
-    #def reset(self):
-        #window.blit(self.image, (self.rect.x, self.rect.y))
-
-        #pygame.sprite.Sprite.__init__(self)
-        #self.image = pygame.image.load('cursor.png')
-        #self.rect = pygame.Rect(0, 0, 10, 10)
 
 #описываем класс оружия
 class Weapon(pygame.sprite.Sprite):
     def __init__(self, position, w, h):
         pygame.sprite.Sprite.__init__(self)
-        #self.image = pygame.image.load('weapon.png')
+        self.image = pygame.image.load('weapon.png')
         self.image=pygame.transform.scale(pygame.image.load('weapon.png'), (w, h))
         self.rect = self.image.get_rect()
         self.rect.topleft = position
@@ -64,7 +69,7 @@ class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y, angle, a,b):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((50, 50))
-        #self.image = pygame.image.load('bullet.png')
+        self.image = pygame.image.load('bullet.png')
         self.image=pygame.transform.scale(pygame.image.load('bullet.png'), (30, 30))
         self.rect = self.image.get_rect()
         self.rect.y= y
@@ -101,8 +106,8 @@ for i in range(5):
     mobs.add(m)
    
 otstup = pygame.math.Vector2(10, 10)
- 
-running = [True]
+timestart = time()
+running = True
 while running:
         screen.fill(WHITE)
  
@@ -135,7 +140,8 @@ while running:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
                     weapon.shoot(angle, a, b)
-        
+        if time()-timestart>10:
+            running =False
         all_sprites.update()
 
         #задаем шкалу вращение и переворачиваем оружие на заданный угол
@@ -149,11 +155,24 @@ while running:
             m = Mob()
             all_sprites.add(m)
             mobs.add(m)
+            count+=1
         screen.blit(mouse.image, mouse.rect)
  
         all_sprites.draw(screen)
         screen.blit(weapon_image, weapon_rect)  
         pygame.display.flip()              
         clock.tick(24)
+
+while not running:
+    if count >5:
+        screen.blit(win_pic, (0, 0))  
+        pygame.display.flip() 
+    else:
+        screen.blit(lost_pic, (0, 0))  
+        pygame.display.flip()   
+
+    for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = True
 
 pygame.quit ()
